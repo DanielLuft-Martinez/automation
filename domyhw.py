@@ -186,11 +186,11 @@ while not confirmed:
 		
 		with open(filname+".py",encoding="utf8", errors='ignore') as fpin:
 			text = fpin.read()
-		# text += """
-		# <markdowncell>
+		text += """
+		<markdowncell>
 
-		# If you can read this, reads_py() is no longer broken! 
-		# """
+		If you can read this, reads_py() is no longer broken! 
+		"""
 		nbook = v3.reads_py(text)
 		nbook = v4.upgrade(nbook)  # Upgrade v3 to v4
 
