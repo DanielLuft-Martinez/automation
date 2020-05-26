@@ -32,7 +32,7 @@ try:
 	parser.add_argument('-d','--dir', action='store_true', help='make a seperate dir for the resulting files')
 	parser.add_argument('-a','--all', action='store_true', help='produce all formats of output')
 	parser.add_argument('-p','--python', action='store_true', help='produce only the python version of the output')
-	parser.add_argument('-i','--idle', action='store_true', help='produce only the idle enhanced python version of the output')
+	parser.add_argument('-i','--idle', action='store_true', help='produce only the idle enhanced python version of the output, ANSI encoding')
 	parser.add_argument('-j','--jupyter', action='store_true', help='produce only the ipython notebook version of the output')
 
 
@@ -133,7 +133,31 @@ try:
 		ifile.write('try:\n')
 		for line in text.split('\n'):
 			ifile.write('\t'+line+'\n')
+		#ifile.write('\t'+'input()\n') # pause for idle
+		ifile.write('except:\n')
+		ifile.write('\t'+'e = sys.exc_info()[0]\n')
+		ifile.write('\t'+'print(e)\n')
 		ifile.write('\t'+'input()\n') # pause for idle
+		
+		
+		# now we're adding the enhancement
+		ifile.write('try:\n')
+		for line in """confirmed = False
+while not confirmed:
+	print('')
+	new_code = input('please enter the next part of the program: (nothing to skip)')
+	if(len(new_code) < 2):
+		break
+	print(f'this is what you entered:{new_code}')
+	confirm = input('are you happy with what you entered? [y/n]: '  )
+	if confirm[0].lower() == 'y':
+		print('your code will now be executed')
+		exec(new_code)
+		confirm = input('are you happy with how it ran? [y/n]: '  )
+		if confirm[0].lower() == 'y':
+			confirmed = True""".split('\n'):
+			ifile.write('\t'+line+'\n')
+#		ifile.write('\t'+'input()\n') # pause for idle
 		ifile.write('except:\n')
 		ifile.write('\t'+'e = sys.exc_info()[0]\n')
 		ifile.write('\t'+'print(e)\n')
@@ -174,8 +198,22 @@ try:
 		with open(filname+".ipynb", "w") as fpout:
 			fpout.write(jsonform)
 		
-
-
+	
+	def idle_enhancement():
+		confirmed = False
+		while not confirmed:
+			print()
+			new_code = input('please enter the next part of the program: (nothing to skip)')
+			if(len(new_code) < 1):
+				break
+			print(f'this is what you entered:\n{new_code}')
+			confirm = input('are you happy with what you entered? [y/n]: '  )
+			if confirm[0].lower() == 'y':
+				print('your code will now be executed')
+				exec(new_code)
+				confirm = input('are you happy with how it ran? [y/n]: '  )
+				if confirm[0].lower() == 'y':
+					confirmed = True
 	# In[ ]:
 
 
@@ -190,6 +228,10 @@ try:
 	pfile = open(filename+'.py', 'w')
 	ifile = open(filename+'.idle.py', 'w')
 
+	ifile.write('import sys\n')
+	ifile.write('# if asked, use ANSI encoding\n')
+	ifile.write('# this will not work out right, please be sure to try running and fix for errors\n')
+	ifile.write('# you will learn more by debugging\n')
 
 	# In[ ]:
 
@@ -274,5 +316,4 @@ try:
 except Exception as e:
 	print(e)
 
-
-
+	
